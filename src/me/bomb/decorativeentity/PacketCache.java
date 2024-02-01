@@ -6,6 +6,7 @@ import java.util.HashMap;
 import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_12_R1.CraftWorld;
 
+import io.netty.channel.ChannelHandlerContext;
 import me.bomb.decorativeentity.ArmorstandOptions.ArmorstandOptionsEntry;
 import me.bomb.decorativeentity.MinecartOptions.MinecartOptionsEntry;
 import net.minecraft.server.v1_12_R1.Block;
@@ -19,15 +20,37 @@ final class PacketCache {
 	private final HashMap<MinecartOptionsEntry[],ArrayList<Object>> cacheminecarts = new HashMap<MinecartOptionsEntry[],ArrayList<Object>>();
 	private final HashMap<ArmorstandOptionsEntry[],ArrayList<Object>> cachearmorstands = new HashMap<ArmorstandOptionsEntry[],ArrayList<Object>>();
 	
-	protected final MinecartOptions minecartoptions;
-	protected final ArmorstandOptions armorstandoptions;
+	private final MinecartOptions minecartoptions;
+	private final ArmorstandOptions armorstandoptions;
 	
 	protected PacketCache(MinecartOptions minecartoptions, ArmorstandOptions armorstandoptions) {
 		this.minecartoptions = minecartoptions;
 		this.armorstandoptions = armorstandoptions;
 	}
+	
+	protected void sendPacketsForChunk(ChannelHandlerContext context, World world, int x, int z) {
+		String worldname = world.getName();
+		MinecartOptionsEntry[] minecartoptions = this.minecartoptions.getOptions(worldname, x, z);
+		if (minecartoptions != null) {
+			for(Object p : this.getPackets(world, minecartoptions)) {
+				context.write(p);
+			}
+		}
+		ArmorstandOptionsEntry[] armorstandoptions = this.armorstandoptions.getOptions(worldname, x, z);
+		if (armorstandoptions != null) {
+			for(Object p : this.getPackets(world, armorstandoptions)) {
+				context.write(p);
+			}
+		}
+	}
+	
+	protected void clear() {
+		cacheminecarts.clear();
+		cachearmorstands.clear();
+	}
 
-	protected ArrayList<Object> getPackets(World world, int chunkx, int chunkz, MinecartOptionsEntry[] options) {
+	//TODO: MAKE THIS CLASS INDEPENDENT TO NMS VERSION
+	private ArrayList<Object> getPackets(World world, MinecartOptionsEntry[] options) {
 		ArrayList<Object> cartspawns = cacheminecarts.get(options);
 		if(cartspawns==null) {
 			cartspawns = new ArrayList<Object>();
@@ -42,7 +65,7 @@ final class PacketCache {
 		return cartspawns;
 	}
 	
-	protected ArrayList<Object> getPackets(World world, int chunkx, int chunkz, ArmorstandOptionsEntry[] options) {
+	private ArrayList<Object> getPackets(World world, ArmorstandOptionsEntry[] options) {
 		ArrayList<Object> sdandspawns = cachearmorstands.get(options);
 		if(sdandspawns==null) {
 			sdandspawns = new ArrayList<Object>();
