@@ -71,7 +71,7 @@ final class MinecartOptions {
 					float yaw = (float) blockcs.getDouble("yaw", 0), pitch = (float) blockcs.getDouble("pitch", 0);
 					int offset = blockcs.getInt("offset", 0);
 					int chunkx = ((int) x) >> 4, chunkz = ((int) z) >> 4;
-					long chunkpos = ((long)chunkx) << 16 | chunkz;
+					long chunkpos = (((long)chunkx) << 32) | (chunkz & 0xFFFFFFFFL);
 					HashSet<MinecartOptionsEntry> chunkoptions = aworldoptions.get(chunkpos);
 					if(chunkoptions==null) chunkoptions = new HashSet<MinecartOptionsEntry>();
 					chunkoptions.add(new MinecartOptionsEntry(material, x, y, z, yaw, pitch, offset, entityid));
@@ -88,9 +88,8 @@ final class MinecartOptions {
 		}
 	}
 	
-	protected final MinecartOptionsEntry[] getOptions(String worldname, int chunkx, int chunkz) {
+	protected final MinecartOptionsEntry[] getOptions(String worldname, long chunkpos) {
 		HashMap<Long, MinecartOptionsEntry[]> worldoptions = options.get(worldname);
-		long chunkpos = ((long)chunkx) << 16 | chunkz;
 		return worldoptions == null ? null : worldoptions.get(chunkpos);
 	}
 	
