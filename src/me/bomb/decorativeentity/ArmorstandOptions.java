@@ -69,7 +69,7 @@ final class ArmorstandOptions {
 					String name = blockcs.getString("name", "");
 					float yaw = (float) blockcs.getDouble("yaw", 0), pitch = (float) blockcs.getDouble("pitch", 0);
 					int chunkx = ((int) x) >> 4, chunkz = ((int) z) >> 4;
-					long chunkpos = ((long)chunkx) << 16 | chunkz;
+					long chunkpos = (((long)chunkx) << 32) | (chunkz & 0xFFFFFFFFL);
 					HashSet<ArmorstandOptionsEntry> chunkoptions = aworldoptions.get(chunkpos);
 					if(chunkoptions==null) chunkoptions = new HashSet<ArmorstandOptionsEntry>();
 					chunkoptions.add(new ArmorstandOptionsEntry(name, x, y, z, yaw, pitch, entityid));
@@ -86,9 +86,8 @@ final class ArmorstandOptions {
 		}
 	}
 	
-	protected ArmorstandOptionsEntry[] getOptions(String worldname, int chunkx, int chunkz) {
+	protected ArmorstandOptionsEntry[] getOptions(String worldname, long chunkpos) {
 		HashMap<Long, ArmorstandOptionsEntry[]> worldoptions = options.get(worldname);
-		long chunkpos = ((long)chunkx) << 16 | chunkz;
 		return worldoptions == null ? null : worldoptions.get(chunkpos);
 	}
 	
