@@ -28,15 +28,15 @@ final class PacketCache {
 		this.armorstandoptions = armorstandoptions;
 	}
 	
-	protected void sendPacketsForChunk(ChannelHandlerContext context, World world, int x, int z) {
+	protected void sendPacketsForChunk(ChannelHandlerContext context, World world, long chunkpos) {
 		String worldname = world.getName();
-		MinecartOptionsEntry[] minecartoptions = this.minecartoptions.getOptions(worldname, x, z);
+		MinecartOptionsEntry[] minecartoptions = this.minecartoptions.getOptions(worldname, chunkpos);
 		if (minecartoptions != null) {
 			for(Object p : this.getPackets(world, minecartoptions)) {
 				context.write(p);
 			}
 		}
-		ArmorstandOptionsEntry[] armorstandoptions = this.armorstandoptions.getOptions(worldname, x, z);
+		ArmorstandOptionsEntry[] armorstandoptions = this.armorstandoptions.getOptions(worldname, chunkpos);
 		if (armorstandoptions != null) {
 			for(Object p : this.getPackets(world, armorstandoptions)) {
 				context.write(p);
