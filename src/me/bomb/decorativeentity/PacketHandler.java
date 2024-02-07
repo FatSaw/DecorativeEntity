@@ -38,7 +38,7 @@ final class PacketHandler extends ChannelDuplexHandler {
 				return;
 			} catch (IndexOutOfBoundsException e) { //DO NOT READ FULL CHUNK WE NEED ONLY FIRST 8 BYTES
 			}
-			cache.sendPacketsForChunk(context, player.getWorld(), packetdataserializer.readInt(), packetdataserializer.readInt());
+			cache.sendPacketsForChunk(context, player.getWorld(), packetdataserializer.readLong());
 		}
 		
 	}
