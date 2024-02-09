@@ -46,7 +46,7 @@ final class ArmorstandOptions {
 			}
 		}
 		ConfigurationSection entityidcs = config.getConfigurationSection("entityid");
-		int minid = -32767, maxid = 0;;
+		int minid = -65535, maxid = -32767;
 		if(entityidcs!=null) {
 			minid = entityidcs.getInt("min", minid);
 			maxid = entityidcs.getInt("max", maxid);
