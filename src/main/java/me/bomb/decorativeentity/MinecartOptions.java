@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.UUID;
 import java.util.Map.Entry;
 
 import org.bukkit.Bukkit;
@@ -34,7 +35,8 @@ final class MinecartOptions {
 			config.set("entityid.min", -32767);
 			config.set("entityid.max", 0);
 			String worldsection = "worlds.".concat(main.getName()).concat(".testblock.");
-			config.set(worldsection.concat("material"), "bedrock");
+			config.set(worldsection.concat("block.id"), 1);
+			config.set(worldsection.concat("block.data"), 6);
 			config.set(worldsection.concat("x"), spawn.getX() + 0.5d);
 			config.set(worldsection.concat("y"), spawn.getY() + 0.5d);
 			config.set(worldsection.concat("z"), spawn.getZ() + 0.5d);
@@ -67,14 +69,15 @@ final class MinecartOptions {
 					if(blockcs==null) continue;
 					double x = blockcs.getDouble("x", Double.NaN), y = blockcs.getDouble("y", Double.NaN), z = blockcs.getDouble("z", Double.NaN);
 					if(x==Double.NaN||y==Double.NaN||z==Double.NaN) continue;
-					String material = blockcs.getString("material", "fire");
+					int blockid = blockcs.getInt("block.id", 0);
+					blockid += blockcs.getInt("block.data", 0) << 12;
 					float yaw = (float) blockcs.getDouble("yaw", 0), pitch = (float) blockcs.getDouble("pitch", 0);
 					int offset = blockcs.getInt("offset", 0);
 					int chunkx = ((int) x) >> 4, chunkz = ((int) z) >> 4;
 					long chunkpos = (((long)chunkx) << 32) | (chunkz & 0xFFFFFFFFL);
 					HashSet<MinecartOptionsEntry> chunkoptions = aworldoptions.get(chunkpos);
 					if(chunkoptions==null) chunkoptions = new HashSet<MinecartOptionsEntry>();
-					chunkoptions.add(new MinecartOptionsEntry(material, x, y, z, yaw, pitch, offset, entityid));
+					chunkoptions.add(new MinecartOptionsEntry(UUID.randomUUID(), blockid, x, y, z, (byte) ((int) (yaw * 256.0F / 360.0F)), (byte) ((int) (pitch * 256.0F / 360.0F)), offset, entityid));
 					++entityid;
 					aworldoptions.put(chunkpos, chunkoptions);
 				}
@@ -94,13 +97,14 @@ final class MinecartOptions {
 	}
 	
 	protected final class MinecartOptionsEntry {
-		protected final String material;
+		protected final UUID uuid;
 		protected final double x, y, z;
-		protected final float yaw, pitch;
-		protected final int offset, npcid;
+		protected final byte yaw, pitch;
+		protected final int blockid, offset, npcid;
 		
-		private MinecartOptionsEntry(String material, double x, double y, double z, float yaw, float pitch, int offset, int npcid) {
-			this.material = material;
+		private MinecartOptionsEntry(UUID uuid, int blockid, double x, double y, double z, byte yaw, byte pitch, int offset, int npcid) {
+			this.uuid = uuid;
+			this.blockid = blockid;
 			this.x = x;
 			this.y = y;
 			this.z = z;
