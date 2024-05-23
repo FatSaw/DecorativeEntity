@@ -7,7 +7,8 @@ public final class DecorativeEntity extends JavaPlugin {
 	public void onEnable() {
 		MinecartOptions minecartoptions = new MinecartOptions(this);
 		ArmorstandOptions armorstandoptions = new ArmorstandOptions(this);
-		PacketCache cache = new PacketCache(minecartoptions,armorstandoptions);
+		HumanOptions humanoptions = new HumanOptions(this);
+		PacketCache cache = new PacketCache(minecartoptions,armorstandoptions, humanoptions);
 		Bukkit.getPluginManager().registerEvents(new EventListener(cache), this);
 	}
 }

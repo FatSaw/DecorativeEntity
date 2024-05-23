@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.UUID;
 import java.util.Map.Entry;
 
 import org.bukkit.Bukkit;
@@ -46,7 +47,7 @@ final class ArmorstandOptions {
 			}
 		}
 		ConfigurationSection entityidcs = config.getConfigurationSection("entityid");
-		int minid = -32767, maxid = 0;;
+		int minid = -65535, maxid = -32767;
 		if(entityidcs!=null) {
 			minid = entityidcs.getInt("min", minid);
 			maxid = entityidcs.getInt("max", maxid);
@@ -72,7 +73,7 @@ final class ArmorstandOptions {
 					long chunkpos = (((long)chunkx) << 32) | (chunkz & 0xFFFFFFFFL);
 					HashSet<ArmorstandOptionsEntry> chunkoptions = aworldoptions.get(chunkpos);
 					if(chunkoptions==null) chunkoptions = new HashSet<ArmorstandOptionsEntry>();
-					chunkoptions.add(new ArmorstandOptionsEntry(name, x, y, z, yaw, pitch, entityid));
+					chunkoptions.add(new ArmorstandOptionsEntry(UUID.randomUUID(), name, x, y, z, (byte) ((int) (yaw * 256.0F / 360.0F)), (byte) ((int) (pitch * 256.0F / 360.0F)), entityid));
 					++entityid;
 					aworldoptions.put(chunkpos, chunkoptions);
 				}
@@ -92,12 +93,14 @@ final class ArmorstandOptions {
 	}
 	
 	protected final class ArmorstandOptionsEntry {
+		protected final UUID uuid;
 		protected final String name;
 		protected final double x, y, z;
-		protected final float yaw, pitch;
+		protected final byte yaw, pitch;
 		protected final int npcid;
 		
-		private ArmorstandOptionsEntry(String name, double x, double y, double z, float yaw, float pitch, int npcid) {
+		private ArmorstandOptionsEntry(UUID uuid, String name, double x, double y, double z, byte yaw, byte pitch, int npcid) {
+			this.uuid = uuid;
 			this.name = name;
 			this.x = x;
 			this.y = y;
