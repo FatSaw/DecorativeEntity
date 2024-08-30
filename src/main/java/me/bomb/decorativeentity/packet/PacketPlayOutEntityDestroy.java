@@ -7,7 +7,7 @@ public final class PacketPlayOutEntityDestroy extends Packet {
 	public int[] ids;
 
 	protected PacketPlayOutEntityDestroy(int... ids) {
-		super((byte) 50);
+		super((byte) 0x36);
 		this.ids = ids;
 	}
 	

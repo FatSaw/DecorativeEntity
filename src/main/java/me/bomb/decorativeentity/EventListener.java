@@ -6,15 +6,15 @@ import org.bukkit.event.player.PlayerJoinEvent;
 
 public final class EventListener implements Listener {
 	
-	private final PacketCache cache;
+	private final PacketSender sender;
 	
-	protected EventListener(PacketCache cache) {
-		this.cache = cache;
+	protected EventListener(PacketSender sender) {
+		this.sender = sender;
 	}
 	
 	@EventHandler
 	public void onJoin(PlayerJoinEvent event) {
-		new PacketHandler(cache, event.getPlayer());
+		new PacketListener(sender, event.getPlayer());
 	}
 
 }

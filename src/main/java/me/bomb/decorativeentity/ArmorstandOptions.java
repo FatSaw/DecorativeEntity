@@ -2,6 +2,7 @@ package me.bomb.decorativeentity;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.UUID;
@@ -14,12 +15,16 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import me.bomb.decorativeentity.packet.Packet;
+import me.bomb.decorativeentity.packet.PacketPlayOutMetadataArmorStand;
+import me.bomb.decorativeentity.packet.PacketPlayOutSpawnArmorStand;
+
 final class ArmorstandOptions {
 	
-	private final HashMap<String, HashMap<Long, ArmorstandOptionsEntry[]>> options = new HashMap<String, HashMap<Long, ArmorstandOptionsEntry[]>>();
+	private final HashMap<String, HashMap<Long, Packet[]>> packets = new HashMap<String, HashMap<Long, Packet[]>>();
 	
 	protected ArmorstandOptions(JavaPlugin plugin) {
-		options.clear();
+		packets.clear();
 		File workingdirectory = plugin.getDataFolder();
 		if(!workingdirectory.exists()) {
 			workingdirectory.mkdirs();
@@ -77,19 +82,40 @@ final class ArmorstandOptions {
 					++entityid;
 					aworldoptions.put(chunkpos, chunkoptions);
 				}
-				HashMap<Long, ArmorstandOptionsEntry[]> worldoptions = new HashMap<Long, ArmorstandOptionsEntry[]>();
+				HashMap<Long, Packet[]> packetoptions = new HashMap<Long, Packet[]>();
 				for(Entry<Long, HashSet<ArmorstandOptionsEntry>> entry : aworldoptions.entrySet()) {
 					HashSet<ArmorstandOptionsEntry> value = entry.getValue();
-					worldoptions.put(entry.getKey(), value.toArray(new ArmorstandOptionsEntry[value.size()]));
+					ArrayList<Packet> sdandspawns = new ArrayList<Packet>();
+					for(ArmorstandOptionsEntry option : value) {
+						PacketPlayOutSpawnArmorStand armorstandspawnpacket = new PacketPlayOutSpawnArmorStand(option.npcid, option.uuid, option.x, option.y, option.z, option.yaw, option.pitch);
+						PacketPlayOutMetadataArmorStand armorstandmetadatapacket = new PacketPlayOutMetadataArmorStand(option.npcid);
+						
+						armorstandmetadatapacket.hasentityflags = true;
+						armorstandmetadatapacket.entityflags = 0x20; //Invisible
+						armorstandmetadatapacket.hasnogravity = true;
+						armorstandmetadatapacket.nogravity = true;
+						if(!option.name.isEmpty()) {
+							armorstandmetadatapacket.hascustomname = true;
+							armorstandmetadatapacket.customname = option.name;
+							armorstandmetadatapacket.hasvisiblecustomname = true;
+							armorstandmetadatapacket.visiblecustomname = true;
+						}
+						
+						armorstandmetadatapacket.hasarmorstandflag = true;
+						armorstandmetadatapacket.armorstandflag = 0x19; //small, no baseplate, marker
+						sdandspawns.add(armorstandspawnpacket);
+						sdandspawns.add(armorstandmetadatapacket);
+					}
+					packetoptions.put(entry.getKey(), sdandspawns.toArray(new Packet[value.size()]));
 				}
-				options.put(worndname, worldoptions);
+				packets.put(worndname, packetoptions);
 			}
 		}
 	}
 	
-	protected ArmorstandOptionsEntry[] getOptions(String worldname, long chunkpos) {
-		HashMap<Long, ArmorstandOptionsEntry[]> worldoptions = options.get(worldname);
-		return worldoptions == null ? null : worldoptions.get(chunkpos);
+	protected Packet[] getPackets(String worldname, long chunkpos) {
+		HashMap<Long, Packet[]> packetoptions = packets.get(worldname);
+		return packetoptions == null ? null : packetoptions.get(chunkpos);
 	}
 	
 	protected final class ArmorstandOptionsEntry {

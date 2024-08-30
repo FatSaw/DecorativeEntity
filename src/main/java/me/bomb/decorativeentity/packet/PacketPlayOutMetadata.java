@@ -23,8 +23,11 @@ class PacketPlayOutMetadata extends Packet {
 	public boolean hasnogravity;
 	public boolean nogravity;
 	
+	public boolean haspose;
+	public EntityPose pose;
+	
 	protected PacketPlayOutMetadata(int id) {
-		super((byte) 60);
+		super((byte) 0x44);
 		this.id = id;
 	}
 	
@@ -43,23 +46,32 @@ class PacketPlayOutMetadata extends Packet {
         }
         if(hascustomname) {
             packetdataserializer.writeByte(2); //CUSTOMNAME ID
-            packetdataserializer.writeNum(3); //STRING
-            packetdataserializer.writeString(customname); //CUSTOMNAME
+            packetdataserializer.writeNum(5); //OptChat
+            boolean present = customname != null;
+            packetdataserializer.writeBoolean(present);//CUSTOMNAME PRESENT
+            if(present) {
+            	packetdataserializer.writeString(customname); //CUSTOMNAME
+            }
         }
         if(hasvisiblecustomname) {
         	packetdataserializer.writeByte(3); //VISIBLECUSTOMNAME ID
-            packetdataserializer.writeNum(6); //BOOLEAN
+            packetdataserializer.writeNum(7); //BOOLEAN
             packetdataserializer.writeBoolean(visiblecustomname);//VISIBLECUSTOMNAME
         }
         if(hassilent) {
             packetdataserializer.writeByte(4); //SILENT ID
-            packetdataserializer.writeNum(6); //BOOLEAN
+            packetdataserializer.writeNum(7); //BOOLEAN
             packetdataserializer.writeBoolean(silent);//NOGRAVITY
         }
         if(hasnogravity) {
             packetdataserializer.writeByte(5); //NOGRAVITY ID
-            packetdataserializer.writeNum(6); //BOOLEAN
+            packetdataserializer.writeNum(7); //BOOLEAN
             packetdataserializer.writeBoolean(nogravity); //NOGRAVITY
+        }
+        if(haspose) {
+            packetdataserializer.writeByte(6); //POSE ID
+            packetdataserializer.writeNum(18); //POSE
+            packetdataserializer.writeEnum(pose); //NOGRAVITY
         }
 	}
 

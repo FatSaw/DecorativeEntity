@@ -8,7 +8,7 @@ public final class PacketPlayOutEntityHeadRotation extends Packet {
 	public byte yaw;
 	
 	public PacketPlayOutEntityHeadRotation(int id, byte yaw) {
-		super((byte) 54);
+		super((byte) 0x3A);
 		this.id = id;
 		this.yaw = yaw;
 	}

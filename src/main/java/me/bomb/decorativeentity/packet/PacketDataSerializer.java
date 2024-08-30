@@ -27,8 +27,7 @@ class PacketDataSerializer extends ByteBuf {
         this.bytebuf = bytebuf;
     }
 
-    public static int countBytes(int i) { return PacketDataSerializer.a(i); } // Paper - Anti-Xray - OBFHELPER
-    public static int a(int i) {
+    public static int countBytes(int i) {
         for (int j = 1; j < 5; ++j) {
             if ((i & -1 << j * 7) == 0) {
                 return j;

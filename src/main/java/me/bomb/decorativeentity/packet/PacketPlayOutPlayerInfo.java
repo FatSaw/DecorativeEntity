@@ -18,7 +18,7 @@ public final class PacketPlayOutPlayerInfo extends Packet {
 	}
 
     public PacketPlayOutPlayerInfo(EnumPlayerInfoAction action, HashMap<UUID, PlayerInfoData> playerinfodata) {
-    	super((byte) 46);
+    	super((byte) 0x32);
     	this.action = action;
     	this.playerinfodata = playerinfodata;
     }
@@ -88,7 +88,7 @@ public final class PacketPlayOutPlayerInfo extends Packet {
     	public String name, displayName, skinvalue, skinsignature;
 
         public PlayerInfoData(String name, @Nullable String skinvalue, @Nullable String skinsignature, int latency, EnumGamemode enumgamemode, @Nullable String displayName) {
-            this.name = name;
+        	this.name = name;
             this.skinvalue = skinvalue;
             this.skinsignature = skinsignature;
             this.latency = latency;

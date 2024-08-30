@@ -15,8 +15,8 @@ public final class PacketPlayOutMetadataMinecartFurnace extends PacketPlayOutMet
 		super.write(packetdataserializer);
 
 		if(hasminecartfurnacepowered) {
-            packetdataserializer.writeByte(12);
-            packetdataserializer.writeNum(6); //BOOLEAN
+            packetdataserializer.writeByte(13);
+            packetdataserializer.writeNum(7); //BOOLEAN
             packetdataserializer.writeBoolean(minecartfurnacepowered);
         }
         packetdataserializer.writeByte(255);

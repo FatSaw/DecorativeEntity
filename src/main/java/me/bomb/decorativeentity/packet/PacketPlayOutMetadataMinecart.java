@@ -37,33 +37,33 @@ public class PacketPlayOutMetadataMinecart extends PacketPlayOutMetadata {
 	protected void write(PacketDataSerializer packetdataserializer) throws IOException {
 		super.write(packetdataserializer);
 		if(hasminecartshakingpower) {
-            packetdataserializer.writeByte(6);
+            packetdataserializer.writeByte(7);
             packetdataserializer.writeNum(1); //VARINT
             packetdataserializer.writeNum(minecartshakingpower);
         }
 		if(hasminecartshakingdirection) {
-            packetdataserializer.writeByte(7);
+            packetdataserializer.writeByte(8);
             packetdataserializer.writeNum(1); //VARINT
             packetdataserializer.writeNum(minecartshakingdirection);
         }
 		if(hasminecartshakingmultiplier) {
-            packetdataserializer.writeByte(8);
+            packetdataserializer.writeByte(9);
             packetdataserializer.writeNum(2); //FLOAT
             packetdataserializer.writeFloat(minecartshakingmultiplier);
         }
 		if(hasminecartcustomblockid) {
-            packetdataserializer.writeByte(9);
+            packetdataserializer.writeByte(10);
             packetdataserializer.writeNum(1); //VARINT
             packetdataserializer.writeNum(minecartcustomblockid);
         }
 		if(hasminecartcustomblockpositiony) {
-            packetdataserializer.writeByte(10);
+            packetdataserializer.writeByte(11);
             packetdataserializer.writeNum(1); //VARINT
             packetdataserializer.writeNum(minecartcustomblockpositiony);
         }
 		if(hasminecartcustomblockshow) {
-            packetdataserializer.writeByte(11);
-            packetdataserializer.writeNum(6); //BOOLEAN
+            packetdataserializer.writeByte(12);
+            packetdataserializer.writeNum(7); //BOOLEAN
             packetdataserializer.writeBoolean(minecartcustomblockshow);
         }
 		if(finish) {

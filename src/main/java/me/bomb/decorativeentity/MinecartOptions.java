@@ -2,6 +2,7 @@ package me.bomb.decorativeentity;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.UUID;
@@ -14,12 +15,17 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import me.bomb.decorativeentity.packet.Packet;
+import me.bomb.decorativeentity.packet.PacketPlayOutMetadataMinecart;
+import me.bomb.decorativeentity.packet.PacketPlayOutSpawnMinecartRideable;
+import me.bomb.decorativeentity.packet.PacketPlayOutSpawnMinecartTNT;
+
 final class MinecartOptions {
 	
-	private final HashMap<String, HashMap<Long, MinecartOptionsEntry[]>> options = new HashMap<String, HashMap<Long, MinecartOptionsEntry[]>>();
+	private final HashMap<String, HashMap<Long, Packet[]>> packets = new HashMap<String, HashMap<Long, Packet[]>>();
 	
 	protected MinecartOptions(JavaPlugin plugin) {
-		options.clear();
+		packets.clear();
 		File workingdirectory = plugin.getDataFolder();
 		if(!workingdirectory.exists()) {
 			workingdirectory.mkdirs();
@@ -81,19 +87,35 @@ final class MinecartOptions {
 					++entityid;
 					aworldoptions.put(chunkpos, chunkoptions);
 				}
-				HashMap<Long, MinecartOptionsEntry[]> worldoptions = new HashMap<Long, MinecartOptionsEntry[]>();
+				HashMap<Long, Packet[]> packetoptions = new HashMap<Long, Packet[]>();
 				for(Entry<Long, HashSet<MinecartOptionsEntry>> entry : aworldoptions.entrySet()) {
 					HashSet<MinecartOptionsEntry> value = entry.getValue();
-					worldoptions.put(entry.getKey(), value.toArray(new MinecartOptionsEntry[value.size()]));
+					ArrayList<Packet> cartspawns = new ArrayList<Packet>();
+					for(MinecartOptionsEntry option : value) {
+						cartspawns.add(new PacketPlayOutSpawnMinecartTNT(option.npcid, option.uuid, option.x, option.y, option.z, option.yaw, option.pitch));
+						PacketPlayOutMetadataMinecart metadataminecartpacket = new PacketPlayOutMetadataMinecart(option.npcid);
+						
+						metadataminecartpacket.hasminecartcustomblockid = true;
+						metadataminecartpacket.minecartcustomblockid = option.blockid;
+						
+						metadataminecartpacket.hasminecartcustomblockpositiony = true;
+						metadataminecartpacket.minecartcustomblockpositiony = option.offset;
+						
+						metadataminecartpacket.hasminecartcustomblockshow = true;
+						metadataminecartpacket.minecartcustomblockshow = true;
+						
+						cartspawns.add(metadataminecartpacket);
+					}
+					packetoptions.put(entry.getKey(), cartspawns.toArray(new Packet[value.size()]));
 				}
-				options.put(worndname, worldoptions);
+				packets.put(worndname, packetoptions);
 			}
 		}
 	}
 	
-	protected final MinecartOptionsEntry[] getOptions(String worldname, long chunkpos) {
-		HashMap<Long, MinecartOptionsEntry[]> worldoptions = options.get(worldname);
-		return worldoptions == null ? null : worldoptions.get(chunkpos);
+	protected final Packet[] getPackets(String worldname, long chunkpos) {
+		HashMap<Long, Packet[]> packetptions = packets.get(worldname);
+		return packetptions == null ? null : packetptions.get(chunkpos);
 	}
 	
 	protected final class MinecartOptionsEntry {
