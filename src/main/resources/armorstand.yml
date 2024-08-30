@@ -1,0 +1,12 @@
+entityid:
+ min: -65535
+ max: -32767
+worlds:
+ world:
+  test:
+   name: {"text":"TEST","color":"#D07736"}
+   x: 0.5
+   y: 0.0
+   z: 0.5
+   yaw: 0
+   pitch: 0

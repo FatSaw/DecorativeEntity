@@ -1,79 +1,86 @@
 package me.bomb.decorativeentity;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.UUID;
 import java.util.Map.Entry;
-
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.World;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.plugin.java.JavaPlugin;
+import java.util.logging.Logger;
 
 import me.bomb.decorativeentity.packet.Packet;
 import me.bomb.decorativeentity.packet.PacketPlayOutMetadataArmorStand;
 import me.bomb.decorativeentity.packet.PacketPlayOutSpawnArmorStand;
+import me.bomb.decorativeentity.util.SimpleConfiguration;
 
 final class ArmorstandOptions {
 	
 	private final HashMap<String, HashMap<Long, Packet[]>> packets = new HashMap<String, HashMap<Long, Packet[]>>();
 	
-	protected ArmorstandOptions(JavaPlugin plugin) {
+	protected ArmorstandOptions(Logger logger, File file) {
 		packets.clear();
-		File workingdirectory = plugin.getDataFolder();
-		if(!workingdirectory.exists()) {
-			workingdirectory.mkdirs();
-		}
-		File configfile = new File(workingdirectory, "armorstand.yml");
-		YamlConfiguration config = null;
-		if(configfile.exists()) {
-			config = YamlConfiguration.loadConfiguration(configfile);
-		} else {
-			config = new YamlConfiguration();
-			World main = Bukkit.getWorlds().get(0);
-			Location spawn = main.getSpawnLocation();
-			config.set("entityid.min", -65535);
-			config.set("entityid.max", -32767);
-			String worldsection = "worlds.".concat(main.getName()).concat(".hologramm.");
-			config.set(worldsection.concat("name"), "STANDNAME");
-			config.set(worldsection.concat("x"), spawn.getX() + 0.5d);
-			config.set(worldsection.concat("y"), spawn.getY());
-			config.set(worldsection.concat("z"), spawn.getZ() + 0.5d);
-			config.set(worldsection.concat("yaw"), 0);
-			config.set(worldsection.concat("pitch"), 0);
+		byte[] bytes = null;
+		if (!file.exists()) {
+			InputStream is = ArmorstandOptions.class.getClassLoader().getResourceAsStream(file.getName());
 			try {
-				config.save(configfile);
+				bytes = new byte[0x0200];
+				bytes = Arrays.copyOf(bytes, is.read(bytes));
+			} catch (IOException e) {
+			}
+			try {
+				is.close();
+			} catch (IOException e) {
+			}
+			try {
+				FileOutputStream fos = new FileOutputStream(file);
+				fos.write(bytes);
+				fos.close();
+			} catch (IOException e) {
+			}
+		} else {
+			try {
+				InputStream is = new FileInputStream(file);
+				long filesize = file.length();
+				if(filesize > 0x01000000) {
+					filesize = 0x01000000;
+				}
+				bytes = new byte[(int) filesize];
+				int size = is.read(bytes);
+				if(size < filesize) {
+					bytes = Arrays.copyOf(bytes, size);
+				}
+				is.close();
 			} catch (IOException e) {
 			}
 		}
-		ConfigurationSection entityidcs = config.getConfigurationSection("entityid");
-		int minid = -65535, maxid = -32767;
-		if(entityidcs!=null) {
-			minid = entityidcs.getInt("min", minid);
-			maxid = entityidcs.getInt("max", maxid);
-		}
-		ConfigurationSection worldscs = config.getConfigurationSection("worlds");
-		if(worldscs!=null) {
-			for(String worndname : worldscs.getKeys(false)) {
+		SimpleConfiguration sc = new SimpleConfiguration(bytes);
+		bytes = null;
+		
+		final int minid = sc.getIntOrDefault("entityid\0min", -65535), maxid = sc.getIntOrDefault("entityid\0max", -32767);
+		String[] worlds = sc.getSubKeys("worlds\0");
+		if(worlds!=null) {
+			for(String worldname : worlds) {
 				int entityid = minid;
 				HashMap<Long, HashSet<ArmorstandOptionsEntry>> aworldoptions = new HashMap<Long, HashSet<ArmorstandOptionsEntry>>();
-				ConfigurationSection worldcs = worldscs.getConfigurationSection(worndname);
-				if(worldcs==null) continue;
-				for(String blockname : worldcs.getKeys(false)) {
+				String worldkey = "worlds\0".concat(worldname).concat("\0");
+				String[] entitys = sc.getSubKeys(worldkey);
+				if(entitys==null) continue;
+				for(String entityname : entitys) {
 					if(entityid>=maxid) {
 						break;
 					}
-					ConfigurationSection blockcs = worldcs.getConfigurationSection(blockname);
-					if(blockcs==null) continue;
-					double x = blockcs.getDouble("x", Double.NaN), y = blockcs.getDouble("y", Double.NaN), z = blockcs.getDouble("z", Double.NaN);
+					String worldentitykey = worldkey.concat(entityname).concat("\0");
+					String[] entityoptions = sc.getSubKeys(worldentitykey);
+					if(entityoptions==null) continue;
+					final double x = sc.getDoubleOrDefault(worldentitykey.concat("x"), Double.NaN), y = sc.getDoubleOrDefault(worldentitykey.concat("y"), Double.NaN), z = sc.getDoubleOrDefault(worldentitykey.concat("z"), Double.NaN);
 					if(x==Double.NaN||y==Double.NaN||z==Double.NaN) continue;
-					String name = blockcs.getString("name", "");
-					float yaw = (float) blockcs.getDouble("yaw", 0), pitch = (float) blockcs.getDouble("pitch", 0);
+					String name = sc.getStringOrDefault(worldentitykey.concat("name"), "");
+					final float yaw = (float) sc.getDoubleOrDefault(worldentitykey.concat("yaw"), 0), pitch = (float) sc.getDoubleOrDefault(worldentitykey.concat("pitch"), 0);
 					int chunkx = ((int) x) >> 4, chunkz = ((int) z) >> 4;
 					long chunkpos = (((long)chunkx) << 32) | (chunkz & 0xFFFFFFFFL);
 					HashSet<ArmorstandOptionsEntry> chunkoptions = aworldoptions.get(chunkpos);
@@ -108,8 +115,14 @@ final class ArmorstandOptions {
 					}
 					packetoptions.put(entry.getKey(), sdandspawns.toArray(new Packet[value.size()]));
 				}
-				packets.put(worndname, packetoptions);
+				packets.put(worldname, packetoptions);
 			}
+		}
+		if(logger==null) return;
+		for(Entry<String, HashMap<Long, Packet[]>> entry : packets.entrySet()) {
+			String worldname = entry.getKey();
+			int chunks = entry.getValue().size();
+			logger.info("Hologramms chunk loaded for world '" + worldname + "' : " + chunks);
 		}
 	}
 	

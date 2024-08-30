@@ -1,21 +1,18 @@
 package me.bomb.decorativeentity;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.UUID;
+import java.util.logging.Logger;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.World;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.plugin.java.JavaPlugin;
-
-import me.bomb.decorativeentity.packet.EntityPose;
 import me.bomb.decorativeentity.packet.EnumGamemode;
 import me.bomb.decorativeentity.packet.Packet;
 import me.bomb.decorativeentity.packet.PacketPlayOutEntityHeadRotation;
@@ -25,68 +22,74 @@ import me.bomb.decorativeentity.packet.PacketPlayOutPlayerSpawn;
 import me.bomb.decorativeentity.packet.PacketPlayOutSetPassengers;
 import me.bomb.decorativeentity.packet.PacketPlayOutPlayerInfo.EnumPlayerInfoAction;
 import me.bomb.decorativeentity.packet.PacketPlayOutPlayerInfo.PlayerInfoData;
+import me.bomb.decorativeentity.util.SimpleConfiguration;
 
 final class HumanOptions {
 	
 	private final HashMap<String, HashMap<Long, Packet[]>> packets = new HashMap<String, HashMap<Long, Packet[]>>();
 	
-	protected HumanOptions(JavaPlugin plugin) {
+	protected HumanOptions(Logger logger, File file) {
 		packets.clear();
-		File workingdirectory = plugin.getDataFolder();
-		if(!workingdirectory.exists()) {
-			workingdirectory.mkdirs();
-		}
-		File configfile = new File(workingdirectory, "human.yml");
-		YamlConfiguration config = null;
-		if(configfile.exists()) {
-			config = YamlConfiguration.loadConfiguration(configfile);
-		} else {
-			config = new YamlConfiguration();
-			World main = Bukkit.getWorlds().get(0);
-			Location spawn = main.getSpawnLocation();
-			config.set("entityid.min", -98302);
-			config.set("entityid.max", -65535);
-			String worldsection = "worlds.".concat(main.getName()).concat(".npc.");
-			config.set(worldsection.concat("name"), "");
-			config.set(worldsection.concat("skin.value"), "");
-			config.set(worldsection.concat("skin.signature"), "");
-			config.set(worldsection.concat("x"), spawn.getX() + 0.5d);
-			config.set(worldsection.concat("y"), spawn.getY());
-			config.set(worldsection.concat("z"), spawn.getZ() + 0.5d);
-			config.set(worldsection.concat("yaw"), 0);
-			config.set(worldsection.concat("pitch"), 0);
-			config.set(worldsection.concat("sittingon"), 0);
+		byte[] bytes = null;
+		if (!file.exists()) {
+			InputStream is = ArmorstandOptions.class.getClassLoader().getResourceAsStream(file.getName());
 			try {
-				config.save(configfile);
+				bytes = new byte[0x0800];
+				bytes = Arrays.copyOf(bytes, is.read(bytes));
+			} catch (IOException e) {
+			}
+			try {
+				is.close();
+			} catch (IOException e) {
+			}
+			try {
+				FileOutputStream fos = new FileOutputStream(file);
+				fos.write(bytes);
+				fos.close();
+			} catch (IOException e) {
+			}
+		} else {
+			try {
+				InputStream is = new FileInputStream(file);
+				long filesize = file.length();
+				if(filesize > 0x01000000) {
+					filesize = 0x01000000;
+				}
+				bytes = new byte[(int) filesize];
+				int size = is.read(bytes);
+				if(size < filesize) {
+					bytes = Arrays.copyOf(bytes, size);
+				}
+				is.close();
 			} catch (IOException e) {
 			}
 		}
-		ConfigurationSection entityidcs = config.getConfigurationSection("entityid");
-		int minid = -98302, maxid = -65535;
-		if(entityidcs!=null) {
-			minid = entityidcs.getInt("min", minid);
-			maxid = entityidcs.getInt("max", maxid);
-		}
-		ConfigurationSection worldscs = config.getConfigurationSection("worlds");
-		if(worldscs!=null) {
-			for(String worndname : worldscs.getKeys(false)) {
+		SimpleConfiguration sc = new SimpleConfiguration(bytes);
+		bytes = null;
+		final int minid = sc.getIntOrDefault("entityid\0min", -98302), maxid = sc.getIntOrDefault("entityid\0max", -65535);
+		
+		String[] worlds = sc.getSubKeys("worlds\0");
+		if(worlds!=null) {
+			for(String worldname : worlds) {
 				int entityid = minid;
 				HashMap<Long, HashSet<HumanOptionsEntry>> aworldoptions = new HashMap<Long, HashSet<HumanOptionsEntry>>();
-				ConfigurationSection worldcs = worldscs.getConfigurationSection(worndname);
-				if(worldcs==null) continue;
-				for(String entityname : worldcs.getKeys(false)) {
+				String worldkey = "worlds\0".concat(worldname).concat("\0");
+				String[] entitys = sc.getSubKeys(worldkey);
+				if(entitys==null) continue;
+				for(String entityname : entitys) {
 					if(entityid>=maxid) {
 						break;
 					}
-					ConfigurationSection entrycs = worldcs.getConfigurationSection(entityname);
-					if(entrycs==null) continue;
-					double x = entrycs.getDouble("x", Double.NaN), y = entrycs.getDouble("y", Double.NaN), z = entrycs.getDouble("z", Double.NaN);
+					String worldentitykey = worldkey.concat(entityname).concat("\0");
+					String[] entityoptions = sc.getSubKeys(worldentitykey);
+					if(entityoptions==null) continue;
+					final double x = sc.getDoubleOrDefault(worldentitykey.concat("x"), Double.NaN), y = sc.getDoubleOrDefault(worldentitykey.concat("y"), Double.NaN), z = sc.getDoubleOrDefault(worldentitykey.concat("z"), Double.NaN);
 					if(x==Double.NaN||y==Double.NaN||z==Double.NaN) continue;
-					String name = entrycs.getString("name", "");
-					String skinvalue = entrycs.getString("skin.value", "");
-					String skinsignature = entrycs.getString("skin.signature", "");
-					float yaw = (float) entrycs.getDouble("yaw", 0), pitch = (float) entrycs.getDouble("pitch", 0);
-					int sittingon = entrycs.getInt("sittingon", 0);
+					String name = sc.getStringOrDefault(worldentitykey.concat("name"), "");
+					String skinvalue = sc.getStringOrDefault(worldentitykey.concat("skin\0value"), "");
+					String skinsignature = sc.getStringOrDefault(worldentitykey.concat("skin\0signature"), "");
+					final float yaw = (float) sc.getDoubleOrDefault(worldentitykey.concat("yaw"), 0), pitch = (float) sc.getDoubleOrDefault(worldentitykey.concat("pitch"), 0);
+					int sittingon = sc.getIntOrDefault(worldentitykey.concat("sittingon"), 0);
 					int chunkx = ((int) x) >> 4, chunkz = ((int) z) >> 4;
 					long chunkpos = (((long)chunkx) << 32) | (chunkz & 0xFFFFFFFFL);
 					HashSet<HumanOptionsEntry> chunkoptions = aworldoptions.get(chunkpos);
@@ -109,20 +112,27 @@ final class HumanOptions {
 						PacketPlayOutPlayerSpawn npcspawnpacket = new PacketPlayOutPlayerSpawn(option.npcid, option.uuid, option.x, option.y, option.z, option.yaw, option.pitch);
 						humanspawns.add(npcspawnpacket);
 						PacketPlayOutMetadataPlayer metadataplayer = new PacketPlayOutMetadataPlayer(option.npcid);
-						metadataplayer.haspose = true;
-						metadataplayer.pose = EntityPose.SLEEPING;
+						metadataplayer.hasskinparts = true;
+						metadataplayer.skinparts = 0x7F; //ENABLE ALL
+						humanspawns.add(metadataplayer);
 						PacketPlayOutEntityHeadRotation rotatepacket = new PacketPlayOutEntityHeadRotation(option.npcid, option.yaw);
 						humanspawns.add(rotatepacket);
 						if(option.sittingon != 0) {
 							humanspawns.add(new PacketPlayOutSetPassengers(option.sittingon, option.npcid));
 						}
 					}
-					humanspawns.add(playerinforemove);
+					//humanspawns.add(playerinforemove);
 					packetoptions.put(entry.getKey(), humanspawns.toArray(new Packet[value.size()]));
 				}
 				
-				packets.put(worndname, packetoptions);
+				packets.put(worldname, packetoptions);
 			}
+		}
+		if(logger==null) return;
+		for(Entry<String, HashMap<Long, Packet[]>> entry : packets.entrySet()) {
+			String world = entry.getKey();
+			int chunks = entry.getValue().size();
+			logger.info("HumanNPC chunk loaded for world '" + world + "' : " + chunks);
 		}
 	}
 	

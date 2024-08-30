@@ -1,6 +1,7 @@
 package me.bomb.decorativeentity;
 
 import org.bukkit.World;
+import org.bukkit.entity.Player;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
@@ -19,15 +20,16 @@ final class PacketSender {
 		this.humanoptions = humanoptions;
 	}
 	
-	protected void sendPacketsForChunk(ChannelHandlerContext context, ChannelPromise promise, PacketEncoder encoder, World world, long chunkpos) {
+	protected void sendPacketsForChunk(ChannelHandlerContext context, ChannelPromise promise, PacketEncoder encoder, Player player, long chunkpos) {
+		World world = player.getWorld();
 		String worldname = world.getName();
-		boolean sent = false;
+		int sent = 0;
 		Packet[] minecartpackets = this.minecartoptions.getPackets(worldname, chunkpos);
 		if (minecartpackets != null) {
-			sent = true;
 			for(Packet packet : minecartpackets) {
 				try {
 					encoder.write(context, packet, promise);
+					++sent;
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -36,10 +38,10 @@ final class PacketSender {
 		
 		Packet[] armorstandpackets = this.armorstandoptions.getPackets(worldname, chunkpos);
 		if (armorstandpackets != null) {
-			sent = true;
 			for(Packet packet : armorstandpackets) {
 				try {
 					encoder.write(context, packet, promise);
+					++sent;
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -48,16 +50,20 @@ final class PacketSender {
 		
 		Packet[] humanpackets = this.humanoptions.getPackets(worldname, chunkpos);
 		if (humanpackets != null) {
-			sent = true;
 			for(Packet packet : humanpackets) {
 				try {
 					encoder.write(context, packet, promise);
+					++sent;
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 		}
-		if(!sent) return;
+		if(sent == 0) {
+			return;
+		}
+		//final int x = (int) (chunkpos >> 32) & 0xFFFFFFFF, z = (int) chunkpos & 0xFFFFFFFF;
+		//player.sendMessage("§f§l[§e§lDE_DEBUG§f§l]§r World: §e'§a" + world.getName() + "§e'§r Sent §e'§a" + sent + "§e'§r packets for chunk X: §e'§a" + x + "§e'§r Z: §e'§a" + z  + "§e'§r."); //DEBUG
 		try {
 			encoder.flush(context);
 		} catch (Exception e) { 

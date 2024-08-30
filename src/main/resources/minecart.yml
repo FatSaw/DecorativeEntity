@@ -1,0 +1,15 @@
+entityid:
+ min: -32767
+ max: 0
+worlds:
+ worlds:
+  test:
+   block:
+    id: 33
+    data: 0
+   x: 0.5
+   y: 0.0
+   z: 0.5
+   yaw: 0
+   pitch: 0
+   offset: -27

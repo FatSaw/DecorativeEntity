@@ -46,7 +46,7 @@ final class PacketListener extends ChannelDuplexHandler {
 				return;
 			} catch (IndexOutOfBoundsException e) { //DO NOT READ FULL CHUNK WE NEED ONLY FIRST 8 BYTES
 			}
-			sender.sendPacketsForChunk(context, voidpromise, encoder, player.getWorld(), packetdataserializer.readLong());
+			sender.sendPacketsForChunk(context, voidpromise, encoder, player, packetdataserializer.readLong());
 		}
 		
 	}
