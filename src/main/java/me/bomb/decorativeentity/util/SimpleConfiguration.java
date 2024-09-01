@@ -106,6 +106,10 @@ public final class SimpleConfiguration {
 		this.kv = kv;
 	}
 	
+	public boolean hasKey(String key) {
+		return kv.containsKey(key);
+	}
+	
 	public boolean getBooleanOrDefault(String key, boolean defaultvalue) {
 		String value = kv.get(key);
 		if(value==null) return defaultvalue;
@@ -121,6 +125,15 @@ public final class SimpleConfiguration {
 		if(value==null) return defaultvalue;
 		try {
 			return Integer.parseInt(value);
+		} catch (NumberFormatException e) {
+			return defaultvalue;
+		}
+	}
+	public int getHexIntOrDefault(String key, int defaultvalue) {
+		String value = kv.get(key);
+		if(value==null) return defaultvalue;
+		try {
+			return Integer.parseInt(value, 16);
 		} catch (NumberFormatException e) {
 			return defaultvalue;
 		}
