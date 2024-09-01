@@ -86,6 +86,9 @@ final class HumanOptions {
 					final double x = sc.getDoubleOrDefault(worldentitykey.concat("x"), Double.NaN), y = sc.getDoubleOrDefault(worldentitykey.concat("y"), Double.NaN), z = sc.getDoubleOrDefault(worldentitykey.concat("z"), Double.NaN);
 					if(x==Double.NaN||y==Double.NaN||z==Double.NaN) continue;
 					String name = sc.getStringOrDefault(worldentitykey.concat("name"), "");
+					String potinocolorkey = worldentitykey.concat("potioncolor");
+					boolean haspotioncolor = sc.hasKey(potinocolorkey);
+					int potioncolor = sc.getHexIntOrDefault(potinocolorkey, 0x00000000);
 					String skinvalue = sc.getStringOrDefault(worldentitykey.concat("skin\0value"), "");
 					String skinsignature = sc.getStringOrDefault(worldentitykey.concat("skin\0signature"), "");
 					final float yaw = (float) sc.getDoubleOrDefault(worldentitykey.concat("yaw"), 0), pitch = (float) sc.getDoubleOrDefault(worldentitykey.concat("pitch"), 0);
@@ -94,7 +97,7 @@ final class HumanOptions {
 					long chunkpos = (((long)chunkx) << 32) | (chunkz & 0xFFFFFFFFL);
 					HashSet<HumanOptionsEntry> chunkoptions = aworldoptions.get(chunkpos);
 					if(chunkoptions==null) chunkoptions = new HashSet<HumanOptionsEntry>();
-					chunkoptions.add(new HumanOptionsEntry(UUID.randomUUID(), name, skinvalue, skinsignature, x, y, z, (byte) ((int) (yaw * 256.0F / 360.0F)), (byte) ((int) (pitch * 256.0F / 360.0F)), entityid, sittingon));
+					chunkoptions.add(new HumanOptionsEntry(UUID.randomUUID(), name, skinvalue, skinsignature, x, y, z, (byte) ((int) (yaw * 256.0F / 360.0F)), (byte) ((int) (pitch * 256.0F / 360.0F)), entityid, sittingon, haspotioncolor, potioncolor));
 					++entityid;
 					aworldoptions.put(chunkpos, chunkoptions);
 				}
@@ -114,6 +117,10 @@ final class HumanOptions {
 						PacketPlayOutMetadataPlayer metadataplayer = new PacketPlayOutMetadataPlayer(option.npcid);
 						metadataplayer.hasskinparts = true;
 						metadataplayer.skinparts = 0x7F; //ENABLE ALL
+						if(option.haspotioncolor) {
+							metadataplayer.haspotioncolor = true;
+							metadataplayer.potioncolor = option.potioncolor;
+						}
 						humanspawns.add(metadataplayer);
 						PacketPlayOutEntityHeadRotation rotatepacket = new PacketPlayOutEntityHeadRotation(option.npcid, option.yaw);
 						humanspawns.add(rotatepacket);
@@ -121,7 +128,7 @@ final class HumanOptions {
 							humanspawns.add(new PacketPlayOutSetPassengers(option.sittingon, option.npcid));
 						}
 					}
-					//humanspawns.add(playerinforemove);
+					humanspawns.add(playerinforemove);
 					packetoptions.put(entry.getKey(), humanspawns.toArray(new Packet[value.size()]));
 				}
 				
@@ -146,9 +153,10 @@ final class HumanOptions {
 		protected final String name, skinvalue, skinsignature;
 		protected final double x, y, z;
 		protected final byte yaw, pitch;
-		protected final int npcid, sittingon;
+		protected final int npcid, sittingon, potioncolor;
+		protected final boolean haspotioncolor;
 		
-		private HumanOptionsEntry(UUID uuid, String name, String skinvalue, String skinsignature, double x, double y, double z, byte yaw, byte pitch, int npcid, int sittingon) {
+		private HumanOptionsEntry(UUID uuid, String name, String skinvalue, String skinsignature, double x, double y, double z, byte yaw, byte pitch, int npcid, int sittingon, boolean haspotioncolor, int potioncolor) {
 			this.uuid = uuid;
 			this.name = name;
 			this.skinvalue = skinvalue; 
@@ -160,6 +168,8 @@ final class HumanOptions {
 			this.pitch = pitch;
 			this.npcid = npcid;
 			this.sittingon = sittingon;
+			this.haspotioncolor = haspotioncolor;
+			this.potioncolor = potioncolor;
 		}
 	}
 	
