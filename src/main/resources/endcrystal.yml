@@ -13,3 +13,4 @@ worlds:
     x: 0
     y: 10
     z: 0
+  bottom: false
