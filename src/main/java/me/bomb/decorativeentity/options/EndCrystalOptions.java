@@ -86,9 +86,9 @@ public final class EndCrystalOptions extends Options  {
 					}
 					packetoptions.put(entry.getKey(), crystalspawns.toArray(new Packet[value.size()]));
 				}
+				packets.put(worldname, packetoptions);
 			}
 		}
-		
 		
 		this.sc = null;
 		if(logger==null) return;
