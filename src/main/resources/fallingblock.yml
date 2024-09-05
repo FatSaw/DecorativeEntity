@@ -1,8 +1,8 @@
 entityid:
- min: -32767
- max: 0
+ min: -163836
+ max: -131069
 worlds:
- worlds:
+ world:
   test:
    blockid: 33
    x: 0.5
@@ -10,4 +10,7 @@ worlds:
    z: 0.5
    yaw: 0
    pitch: 0
-   offset: -27
+   spawn:
+    x: 0
+    y: 10
+    z: 0

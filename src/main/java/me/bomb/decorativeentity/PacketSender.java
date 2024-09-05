@@ -9,6 +9,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 import me.bomb.decorativeentity.options.ArmorstandOptions;
 import me.bomb.decorativeentity.options.EndCrystalOptions;
+import me.bomb.decorativeentity.options.FallingBlockOptions;
 import me.bomb.decorativeentity.options.HumanOptions;
 import me.bomb.decorativeentity.options.MinecartOptions;
 import me.bomb.decorativeentity.packet.Packet;
@@ -21,6 +22,7 @@ final class PacketSender {
 	protected MinecartOptions minecartoptions;
 	protected ArmorstandOptions armorstandoptions;
 	protected EndCrystalOptions endcrystaloptions;
+	protected FallingBlockOptions fallingblockoptions;
 	protected HumanOptions humanoptions;
 	
 	protected PacketSender(Plugin plugin, BukkitScheduler sheduler) {
@@ -65,6 +67,20 @@ final class PacketSender {
 			Packet[] endcrystalpackets = this.endcrystaloptions.getPackets(worldname, chunkpos);
 			if (endcrystalpackets != null) {
 				for(Packet packet : endcrystalpackets) {
+					try {
+						encoder.write(context, packet, promise);
+						++sent;
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+		
+		if(fallingblockoptions!=null) {
+			Packet[] fallingblockpackets = this.fallingblockoptions.getPackets(worldname, chunkpos);
+			if (fallingblockpackets != null) {
+				for(Packet packet : fallingblockpackets) {
 					try {
 						encoder.write(context, packet, promise);
 						++sent;

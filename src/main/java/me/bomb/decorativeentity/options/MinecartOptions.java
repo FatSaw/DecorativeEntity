@@ -12,7 +12,7 @@ import me.bomb.decorativeentity.packet.Packet;
 import me.bomb.decorativeentity.packet.PacketPlayOutMetadataMinecart;
 import me.bomb.decorativeentity.packet.PacketPlayOutSpawnMinecartTNT;
 
-public final class MinecartOptions extends Options{
+public final class MinecartOptions extends Options {
 	
 	public MinecartOptions(Logger logger, File file) {
 		super(file, 0x0200);
@@ -35,7 +35,7 @@ public final class MinecartOptions extends Options{
 					if(entityoptions==null) continue;
 					final double x = sc.getDoubleOrDefault(worldentitykey.concat("x"), Double.NaN), y = sc.getDoubleOrDefault(worldentitykey.concat("y"), Double.NaN), z = sc.getDoubleOrDefault(worldentitykey.concat("z"), Double.NaN);
 					if(x==Double.NaN||y==Double.NaN||z==Double.NaN) continue;
-					int blockid = sc.getHexIntOrDefault(worldentitykey.concat("block\0id"), 0);
+					int blockid = sc.getHexIntOrDefault(worldentitykey.concat("blockid"), 0);
 					//blockid += sc.getIntOrDefault(worldentitykey.concat("block\0data"), 0) << 12;
 					final float yaw = (float) sc.getDoubleOrDefault(worldentitykey.concat("yaw"), 0), pitch = (float) sc.getDoubleOrDefault(worldentitykey.concat("pitch"), 0);
 					int offset = sc.getHexIntOrDefault(worldentitykey.concat("offset"), 0);

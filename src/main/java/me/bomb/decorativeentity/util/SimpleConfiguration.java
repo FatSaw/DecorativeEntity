@@ -175,7 +175,6 @@ public final class SimpleConfiguration {
 				sectionend = keylength;
 			}
 			keys.add(key.substring(parentsectionlength, sectionend));
-
 		}
 		return keys.toArray(new String[keys.size()]);
 	}

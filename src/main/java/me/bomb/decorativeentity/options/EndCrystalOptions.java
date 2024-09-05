@@ -13,7 +13,7 @@ import me.bomb.decorativeentity.packet.Packet;
 import me.bomb.decorativeentity.packet.PacketPlayOutMetadataEndCrystal;
 import me.bomb.decorativeentity.packet.PacketPlayOutSpawnEndCrystal;
 
-public final class EndCrystalOptions extends Options  {
+public final class EndCrystalOptions extends Options {
 	
 	public EndCrystalOptions(Logger logger, File file) {
 		super(file, 0x0200);
@@ -42,8 +42,7 @@ public final class EndCrystalOptions extends Options  {
 					String beamkey = worldentitykey.concat("beam\0");
 					String[] beamsectionkeys = sc.getSubKeys(beamkey);
 					boolean hasbeamx = false, hasbeamy = false, hasbeamz = false;
-					boolean hasbeamtarget = beamsectionkeys != null;
-					if(hasbeamtarget) {
+					if(beamsectionkeys != null) {
 						int beamsectionlength = beamsectionkeys.length;
 						while(--beamsectionlength > -1) {
 							if(beamsectionkeys[beamsectionlength].equals("x")) {
@@ -63,7 +62,7 @@ public final class EndCrystalOptions extends Options  {
 					boolean bottom = sc.getBooleanOrDefault(bottomkey, false);
 					HashSet<EndCrystalOptionsEntry> chunkoptions = aworldoptions.get(chunkpos);
 					if(chunkoptions==null) chunkoptions = new HashSet<EndCrystalOptionsEntry>();
-					chunkoptions.add(new EndCrystalOptionsEntry(UUID.randomUUID(), x, y, z, (byte) ((int) (yaw * 256.0F / 360.0F)), (byte) ((int) (pitch * 256.0F / 360.0F)), entityid, hasbeamtarget, beamtarget, hasbottom, bottom));
+					chunkoptions.add(new EndCrystalOptionsEntry(UUID.randomUUID(), x, y, z, (byte) ((int) (yaw * 256.0F / 360.0F)), (byte) ((int) (pitch * 256.0F / 360.0F)), entityid, beamtarget != null, beamtarget, hasbottom, bottom));
 					++entityid;
 					aworldoptions.put(chunkpos, chunkoptions);
 				}
