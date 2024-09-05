@@ -17,7 +17,7 @@ class PacketPlayOutEntitySpawn extends Packet {
 	public short velocityX = 0;
 	public short velocityY = 0;
 	public short velocityZ = 0;
-    
+
 	protected PacketPlayOutEntitySpawn(int id, UUID uuid, int type, double x, double y, double z, byte yaw, byte pitch, int subtypeid, short velocityX, short velocityY, short velocityZ) {
 		super((byte) 0x00);
 		this.id = id;
@@ -33,21 +33,21 @@ class PacketPlayOutEntitySpawn extends Packet {
 		this.velocityY = velocityY;
 		this.velocityZ = velocityZ;
 	}
-	
+
 	protected final void write(PacketDataSerializer packetdataserializer) throws IOException {
 		super.write(packetdataserializer);
 		packetdataserializer.writeNum(id);
-        packetdataserializer.writeUUID(uuid);
-        packetdataserializer.writeNum(type);
-        packetdataserializer.writeDouble(x);
-        packetdataserializer.writeDouble(y);
-        packetdataserializer.writeDouble(z);
-        packetdataserializer.writeByte(yaw);
-        packetdataserializer.writeByte(pitch);
-        packetdataserializer.writeInt(subtypeid);
-        packetdataserializer.writeShort(velocityX);
-        packetdataserializer.writeShort(velocityY);
-        packetdataserializer.writeShort(velocityZ);
+		packetdataserializer.writeUUID(uuid);
+		packetdataserializer.writeNum(type);
+		packetdataserializer.writeDouble(x);
+		packetdataserializer.writeDouble(y);
+		packetdataserializer.writeDouble(z);
+		packetdataserializer.writeByte(yaw);
+		packetdataserializer.writeByte(pitch);
+		packetdataserializer.writeInt(subtypeid);
+		packetdataserializer.writeShort(velocityX);
+		packetdataserializer.writeShort(velocityY);
+		packetdataserializer.writeShort(velocityZ);
 	}
 
 }

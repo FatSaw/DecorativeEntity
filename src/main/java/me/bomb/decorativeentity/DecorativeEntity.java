@@ -14,23 +14,23 @@ import me.bomb.decorativeentity.options.HumanOptions;
 import me.bomb.decorativeentity.options.MinecartOptions;
 
 public final class DecorativeEntity extends JavaPlugin {
-	
+
 	private final PacketSender sender;
-	
+
 	public DecorativeEntity() {
 		this.sender = new PacketSender(this, Bukkit.getScheduler());
 	}
-	
+
 	public void onEnable() {
 		this.reload();
 		PluginCommand decorativeentitycommand = getCommand("decorativeentity");
 		decorativeentitycommand.setExecutor(new DeCommand(this));
 		Bukkit.getPluginManager().registerEvents(new EventListener(sender), this);
 	}
-	
+
 	protected void reload() {
 		File workingdirectory = this.getDataFolder();
-		if(!workingdirectory.exists()) {
+		if (!workingdirectory.exists()) {
 			workingdirectory.mkdirs();
 		}
 		Logger logger = getLogger();

@@ -6,20 +6,20 @@ public final class PacketPlayOutMetadataMinecartFurnace extends PacketPlayOutMet
 
 	public boolean hasminecartfurnacepowered;
 	public boolean minecartfurnacepowered;
-	
+
 	public PacketPlayOutMetadataMinecartFurnace(int id) {
 		super(id, false);
 	}
-	
+
 	protected void write(PacketDataSerializer packetdataserializer) throws IOException {
 		super.write(packetdataserializer);
 
-		if(hasminecartfurnacepowered) {
-            packetdataserializer.writeByte(13);
-            packetdataserializer.writeNum(7); //BOOLEAN
-            packetdataserializer.writeBoolean(minecartfurnacepowered);
-        }
-        packetdataserializer.writeByte(255);
+		if (hasminecartfurnacepowered) {
+			packetdataserializer.writeByte(13);
+			packetdataserializer.writeNum(7); // BOOLEAN
+			packetdataserializer.writeBoolean(minecartfurnacepowered);
+		}
+		packetdataserializer.writeByte(255);
 	}
 
 }

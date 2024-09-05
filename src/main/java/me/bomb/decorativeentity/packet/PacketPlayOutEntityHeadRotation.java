@@ -3,10 +3,10 @@ package me.bomb.decorativeentity.packet;
 import java.io.IOException;
 
 public final class PacketPlayOutEntityHeadRotation extends Packet {
-	
+
 	public int id;
 	public byte yaw;
-	
+
 	public PacketPlayOutEntityHeadRotation(int id, byte yaw) {
 		super((byte) 0x3A);
 		this.id = id;

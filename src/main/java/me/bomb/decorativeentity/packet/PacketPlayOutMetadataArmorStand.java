@@ -18,63 +18,63 @@ public final class PacketPlayOutMetadataArmorStand extends PacketPlayOutMetadata
 	public float leftlegrotationx, leftlegrotationy, leftlegrotationz;
 	public boolean hasarmorstandrightlegrotation;
 	public float rightlegrotationx, rightlegrotationy, rightlegrotationz;
-	
+
 	public PacketPlayOutMetadataArmorStand(int id) {
 		super(id);
 	}
-	
+
 	protected final void write(PacketDataSerializer packetdataserializer) throws IOException {
 		super.write(packetdataserializer);
-		if(hasarmorstandflag) {
+		if (hasarmorstandflag) {
 			packetdataserializer.writeByte(14);
-			packetdataserializer.writeNum(0); //BYTE
-	        packetdataserializer.writeByte(armorstandflag);
+			packetdataserializer.writeNum(0); // BYTE
+			packetdataserializer.writeByte(armorstandflag);
 		}
-		if(hasarmorstandheadrotation) {
+		if (hasarmorstandheadrotation) {
 			packetdataserializer.writeByte(15);
-			packetdataserializer.writeNum(8); //Rotation
-	        packetdataserializer.writeFloat(headrotationx);
-	        packetdataserializer.writeFloat(headrotationy);
-	        packetdataserializer.writeFloat(headrotationz);
+			packetdataserializer.writeNum(8); // Rotation
+			packetdataserializer.writeFloat(headrotationx);
+			packetdataserializer.writeFloat(headrotationy);
+			packetdataserializer.writeFloat(headrotationz);
 		}
 
-		if(hasarmorstandbodyrotation) {
+		if (hasarmorstandbodyrotation) {
 			packetdataserializer.writeByte(16);
-			packetdataserializer.writeNum(8); //Rotation
-	        packetdataserializer.writeFloat(bodyrotationx);
-	        packetdataserializer.writeFloat(bodyrotationy);
-	        packetdataserializer.writeFloat(bodyrotationz);
+			packetdataserializer.writeNum(8); // Rotation
+			packetdataserializer.writeFloat(bodyrotationx);
+			packetdataserializer.writeFloat(bodyrotationy);
+			packetdataserializer.writeFloat(bodyrotationz);
 		}
-		if(hasarmorstandleftarmrotation) {
+		if (hasarmorstandleftarmrotation) {
 			packetdataserializer.writeByte(17);
-			packetdataserializer.writeNum(8); //Rotation
-	        packetdataserializer.writeFloat(leftarmrotationx);
-	        packetdataserializer.writeFloat(leftarmrotationy);
-	        packetdataserializer.writeFloat(leftarmrotationz);
+			packetdataserializer.writeNum(8); // Rotation
+			packetdataserializer.writeFloat(leftarmrotationx);
+			packetdataserializer.writeFloat(leftarmrotationy);
+			packetdataserializer.writeFloat(leftarmrotationz);
 		}
-		if(hasarmorstandrightarmrotation) {
+		if (hasarmorstandrightarmrotation) {
 			packetdataserializer.writeByte(18);
-			packetdataserializer.writeNum(8); //Rotation
-	        packetdataserializer.writeFloat(rightarmrotationx);
-	        packetdataserializer.writeFloat(rightarmrotationy);
-	        packetdataserializer.writeFloat(rightarmrotationz);
+			packetdataserializer.writeNum(8); // Rotation
+			packetdataserializer.writeFloat(rightarmrotationx);
+			packetdataserializer.writeFloat(rightarmrotationy);
+			packetdataserializer.writeFloat(rightarmrotationz);
 		}
-		if(hasarmorstandleftlegrotation) {
+		if (hasarmorstandleftlegrotation) {
 			packetdataserializer.writeByte(19);
-			packetdataserializer.writeNum(8); //Rotation
-	        packetdataserializer.writeFloat(leftlegrotationx);
-	        packetdataserializer.writeFloat(leftlegrotationy);
-	        packetdataserializer.writeFloat(leftlegrotationz);
+			packetdataserializer.writeNum(8); // Rotation
+			packetdataserializer.writeFloat(leftlegrotationx);
+			packetdataserializer.writeFloat(leftlegrotationy);
+			packetdataserializer.writeFloat(leftlegrotationz);
 		}
-		if(hasarmorstandrightlegrotation) {
+		if (hasarmorstandrightlegrotation) {
 			packetdataserializer.writeByte(20);
-			packetdataserializer.writeNum(8); //Rotation
-	        packetdataserializer.writeFloat(rightlegrotationx);
-	        packetdataserializer.writeFloat(rightlegrotationy);
-	        packetdataserializer.writeFloat(rightlegrotationz);
+			packetdataserializer.writeNum(8); // Rotation
+			packetdataserializer.writeFloat(rightlegrotationx);
+			packetdataserializer.writeFloat(rightlegrotationy);
+			packetdataserializer.writeFloat(rightlegrotationz);
 		}
-        
-        packetdataserializer.writeByte(255);
+
+		packetdataserializer.writeByte(255);
 	}
 
 }

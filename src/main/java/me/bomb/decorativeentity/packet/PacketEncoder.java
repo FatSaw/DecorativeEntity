@@ -9,10 +9,10 @@ public class PacketEncoder extends MessageToByteEncoder<Packet> {
 	@Override
 	protected void encode(ChannelHandlerContext context, Packet packet, ByteBuf bytebuf) throws Exception {
 		PacketDataSerializer packetdataserializer = new PacketDataSerializer(bytebuf);
-        try {
-            packet.write(packetdataserializer);
-        } catch (Throwable throwable) {
-        }
+		try {
+			packet.write(packetdataserializer);
+		} catch (Throwable throwable) {
+		}
 	}
 
 }
