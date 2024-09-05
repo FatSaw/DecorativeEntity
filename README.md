@@ -3,7 +3,7 @@ Spawns decorative entities
 ## Features / how it works:
 * Packet handler gets sent chunk location, send all entity packets to player after chunk was sent.
 * Entity packets precalculated on plugin start.
-* Separated packetencoder used to full access all packet fields.
+* Separated packetencoder used to full access all packet fields(some implemented yet).
 
 ## Entity list
 * Text hologramms
