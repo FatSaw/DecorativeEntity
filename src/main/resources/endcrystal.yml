@@ -1,0 +1,15 @@
+entityid:
+ min: -131069
+ max: -65535
+worlds:
+ world:
+  test:
+   x: 0.5
+   y: 0.0
+   z: 0.5
+   yaw: 0
+   pitch: 0
+   beam:
+    x: 0
+    y: 10
+    z: 0

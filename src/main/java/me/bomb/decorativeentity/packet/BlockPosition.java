@@ -1,6 +1,6 @@
 package me.bomb.decorativeentity.packet;
 
-public class BlockPosition {
+public final class BlockPosition {
 
     /*private static final int f = 0x1A;
     private static final int g = 0x1A;

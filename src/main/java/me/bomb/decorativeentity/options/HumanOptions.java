@@ -1,12 +1,7 @@
-package me.bomb.decorativeentity;
+package me.bomb.decorativeentity.options;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map.Entry;
@@ -22,50 +17,12 @@ import me.bomb.decorativeentity.packet.PacketPlayOutPlayerSpawn;
 import me.bomb.decorativeentity.packet.PacketPlayOutSetPassengers;
 import me.bomb.decorativeentity.packet.PacketPlayOutPlayerInfo.EnumPlayerInfoAction;
 import me.bomb.decorativeentity.packet.PacketPlayOutPlayerInfo.PlayerInfoData;
-import me.bomb.decorativeentity.util.SimpleConfiguration;
 
-final class HumanOptions {
+public final class HumanOptions extends Options {
 	
-	private final HashMap<String, HashMap<Long, Packet[]>> packets = new HashMap<String, HashMap<Long, Packet[]>>();
-	
-	protected HumanOptions(Logger logger, File file) {
-		packets.clear();
-		byte[] bytes = null;
-		if (!file.exists()) {
-			InputStream is = ArmorstandOptions.class.getClassLoader().getResourceAsStream(file.getName());
-			try {
-				bytes = new byte[0x0800];
-				bytes = Arrays.copyOf(bytes, is.read(bytes));
-			} catch (IOException e) {
-			}
-			try {
-				is.close();
-			} catch (IOException e) {
-			}
-			try {
-				FileOutputStream fos = new FileOutputStream(file);
-				fos.write(bytes);
-				fos.close();
-			} catch (IOException e) {
-			}
-		} else {
-			try {
-				InputStream is = new FileInputStream(file);
-				long filesize = file.length();
-				if(filesize > 0x01000000) {
-					filesize = 0x01000000;
-				}
-				bytes = new byte[(int) filesize];
-				int size = is.read(bytes);
-				if(size < filesize) {
-					bytes = Arrays.copyOf(bytes, size);
-				}
-				is.close();
-			} catch (IOException e) {
-			}
-		}
-		SimpleConfiguration sc = new SimpleConfiguration(bytes);
-		bytes = null;
+	public HumanOptions(Logger logger, File file) {
+		super(file, 0x0800);
+		
 		final int minid = sc.getIntOrDefault("entityid\0min", -98302), maxid = sc.getIntOrDefault("entityid\0max", -65535);
 		
 		String[] worlds = sc.getSubKeys("worlds\0");
@@ -108,9 +65,9 @@ final class HumanOptions {
 					ArrayList<Packet> humanspawns = new ArrayList<Packet>();
 					humanspawns.add(playerinfoadd);
 					for(HumanOptionsEntry option : value) {
-						PlayerInfoData infodata = new PlayerInfoData(option.name, option.skinvalue, option.skinsignature, 0, EnumGamemode.CREATIVE, null);
+						PlayerInfoData infodata = new PlayerInfoData(option.name, option.skinvalue, option.skinsignature, -1, EnumGamemode.NOTSET, null);
 						playerinfoadd.playerinfodata.put(option.uuid, infodata);
-						playerinforemove.playerinfodata.put(option.uuid, infodata);
+						playerinforemove.playerinfodata.put(option.uuid, null);
 						
 						PacketPlayOutPlayerSpawn npcspawnpacket = new PacketPlayOutPlayerSpawn(option.npcid, option.uuid, option.x, option.y, option.z, option.yaw, option.pitch);
 						humanspawns.add(npcspawnpacket);
@@ -128,6 +85,7 @@ final class HumanOptions {
 							humanspawns.add(new PacketPlayOutSetPassengers(option.sittingon, option.npcid));
 						}
 					}
+					humanspawns.add(playerinfoadd);
 					humanspawns.add(playerinforemove);
 					packetoptions.put(entry.getKey(), humanspawns.toArray(new Packet[value.size()]));
 				}
@@ -135,17 +93,13 @@ final class HumanOptions {
 				packets.put(worldname, packetoptions);
 			}
 		}
+		this.sc = null;
 		if(logger==null) return;
 		for(Entry<String, HashMap<Long, Packet[]>> entry : packets.entrySet()) {
 			String world = entry.getKey();
 			int chunks = entry.getValue().size();
 			logger.info("HumanNPC chunk loaded for world '" + world + "' : " + chunks);
 		}
-	}
-	
-	protected Packet[] getPackets(String worldname, long chunkpos) {
-		HashMap<Long, Packet[]> packetoptions = packets.get(worldname);
-		return packetoptions == null ? null : packetoptions.get(chunkpos);
 	}
 	
 	protected final class HumanOptionsEntry {

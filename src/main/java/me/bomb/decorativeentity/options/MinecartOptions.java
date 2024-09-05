@@ -1,12 +1,7 @@
-package me.bomb.decorativeentity;
+package me.bomb.decorativeentity.options;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.UUID;
@@ -15,52 +10,13 @@ import java.util.Map.Entry;
 
 import me.bomb.decorativeentity.packet.Packet;
 import me.bomb.decorativeentity.packet.PacketPlayOutMetadataMinecart;
-import me.bomb.decorativeentity.packet.PacketPlayOutSpawnMinecartRideable;
 import me.bomb.decorativeentity.packet.PacketPlayOutSpawnMinecartTNT;
-import me.bomb.decorativeentity.util.SimpleConfiguration;
 
-final class MinecartOptions {
+public final class MinecartOptions extends Options{
 	
-	private final HashMap<String, HashMap<Long, Packet[]>> packets = new HashMap<String, HashMap<Long, Packet[]>>();
-	
-	protected MinecartOptions(Logger logger, File file) {
-		packets.clear();
-		byte[] bytes = null;
-		if (!file.exists()) {
-			InputStream is = ArmorstandOptions.class.getClassLoader().getResourceAsStream(file.getName());
-			try {
-				bytes = new byte[0x0200];
-				bytes = Arrays.copyOf(bytes, is.read(bytes));
-			} catch (IOException e) {
-			}
-			try {
-				is.close();
-			} catch (IOException e) {
-			}
-			try {
-				FileOutputStream fos = new FileOutputStream(file);
-				fos.write(bytes);
-				fos.close();
-			} catch (IOException e) {
-			}
-		} else {
-			try {
-				InputStream is = new FileInputStream(file);
-				long filesize = file.length();
-				if(filesize > 0x01000000) {
-					filesize = 0x01000000;
-				}
-				bytes = new byte[(int) filesize];
-				int size = is.read(bytes);
-				if(size < filesize) {
-					bytes = Arrays.copyOf(bytes, size);
-				}
-				is.close();
-			} catch (IOException e) {
-			}
-		}
-		SimpleConfiguration sc = new SimpleConfiguration(bytes);
-		bytes = null;
+	public MinecartOptions(Logger logger, File file) {
+		super(file, 0x0200);
+		
 		final int minid = sc.getIntOrDefault("entityid\0min", -32767), maxid = sc.getIntOrDefault("entityid\0max", 0);
 		String[] worlds = sc.getSubKeys("worlds\0");
 		if(worlds!=null) {
@@ -79,10 +35,10 @@ final class MinecartOptions {
 					if(entityoptions==null) continue;
 					final double x = sc.getDoubleOrDefault(worldentitykey.concat("x"), Double.NaN), y = sc.getDoubleOrDefault(worldentitykey.concat("y"), Double.NaN), z = sc.getDoubleOrDefault(worldentitykey.concat("z"), Double.NaN);
 					if(x==Double.NaN||y==Double.NaN||z==Double.NaN) continue;
-					int blockid = sc.getIntOrDefault(worldentitykey.concat("block\0id"), 0);
-					blockid += sc.getIntOrDefault(worldentitykey.concat("block\0data"), 0) << 12;
+					int blockid = sc.getHexIntOrDefault(worldentitykey.concat("block\0id"), 0);
+					//blockid += sc.getIntOrDefault(worldentitykey.concat("block\0data"), 0) << 12;
 					final float yaw = (float) sc.getDoubleOrDefault(worldentitykey.concat("yaw"), 0), pitch = (float) sc.getDoubleOrDefault(worldentitykey.concat("pitch"), 0);
-					int offset = sc.getIntOrDefault(worldentitykey.concat("offset"), 0);
+					int offset = sc.getHexIntOrDefault(worldentitykey.concat("offset"), 0);
 					int chunkx = ((int) x) >> 4, chunkz = ((int) z) >> 4;
 					long chunkpos = (((long)chunkx) << 32) | (chunkz & 0xFFFFFFFFL);
 					HashSet<MinecartOptionsEntry> chunkoptions = aworldoptions.get(chunkpos);
@@ -115,17 +71,13 @@ final class MinecartOptions {
 				packets.put(worldname, packetoptions);
 			}
 		}
+		this.sc = null;
 		if(logger==null) return;
 		for(Entry<String, HashMap<Long, Packet[]>> entry : packets.entrySet()) {
 			String world = entry.getKey();
 			int chunks = entry.getValue().size();
 			logger.info("Minecart chunk loaded for world '" + world + "' : " + chunks);
 		}
-	}
-	
-	protected final Packet[] getPackets(String worldname, long chunkpos) {
-		HashMap<Long, Packet[]> packetptions = packets.get(worldname);
-		return packetptions == null ? null : packetptions.get(chunkpos);
 	}
 	
 	protected final class MinecartOptionsEntry {
