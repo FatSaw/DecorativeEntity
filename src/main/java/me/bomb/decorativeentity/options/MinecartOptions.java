@@ -66,7 +66,7 @@ public final class MinecartOptions extends Options {
 
 						cartspawns.add(metadataminecartpacket);
 					}
-					packetoptions.put(entry.getKey(), cartspawns.toArray(new Packet[value.size()]));
+					packetoptions.put(entry.getKey(), cartspawns.toArray(new Packet[cartspawns.size()]));
 				}
 				packets.put(worldname, packetoptions);
 			}

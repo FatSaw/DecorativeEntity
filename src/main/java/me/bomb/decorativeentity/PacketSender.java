@@ -14,6 +14,7 @@ import me.bomb.decorativeentity.options.HumanOptions;
 import me.bomb.decorativeentity.options.MinecartOptions;
 import me.bomb.decorativeentity.packet.Packet;
 import me.bomb.decorativeentity.packet.PacketEncoder;
+import me.bomb.decorativeentity.util.ObjectContainer;
 
 final class PacketSender {
 
@@ -30,9 +31,11 @@ final class PacketSender {
 		this.sheduler = sheduler;
 	}
 
-	protected void sendPacketsForChunk(ChannelHandlerContext context, ChannelPromise promise, PacketEncoder encoder, Player player, long chunkpos) {
+	protected void sendPacketsForChunk(ChannelHandlerContext context, ChannelPromise promise, PacketEncoder encoder, Player player, ObjectContainer<String> sc, long chunkpos) {
 		World world = player.getWorld();
 		String worldname = world.getName();
+		//String langkey = player.getLocale();
+		String langkey = sc.value;
 		int sent = 0;
 
 		if (minecartoptions != null) {
@@ -50,6 +53,7 @@ final class PacketSender {
 		}
 
 		if (armorstandoptions != null) {
+			
 			Packet[] armorstandpackets = this.armorstandoptions.getPackets(worldname, chunkpos);
 			if (armorstandpackets != null) {
 				for (Packet packet : armorstandpackets) {
@@ -59,6 +63,24 @@ final class PacketSender {
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
+				}
+			}
+			
+			if(langkey == null) {
+				sheduler.runTaskLaterAsynchronously(plugin, new DelayedLangPacketsSender(encoder, context, armorstandoptions, promise, player, worldname, sc, chunkpos), 50);
+			} else {
+				String worldwithlang = worldname.concat("\0").concat(langkey);
+				Packet[] langarmorstandpackets = this.armorstandoptions.getPackets(worldwithlang, chunkpos);
+				if(langarmorstandpackets != null) {
+					for (Packet packet : langarmorstandpackets) {
+						try {
+							encoder.write(context, packet, promise);
+							++sent;
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+					
 				}
 			}
 		}
@@ -128,12 +150,56 @@ final class PacketSender {
 			 * (Exception e) { e.printStackTrace(); }
 			 */
 		}
+		//player.sendMessage("§f§l[§e§lDE_DEBUG§f§l]§r World+lang: §e'§a" + worldwithlang + "§e'");
 		// final int x = (int) (chunkpos >> 32) & 0xFFFFFFFF, z = (int) chunkpos &
 		// 0xFFFFFFFF;
-		// player.sendMessage("§f§l[§e§lDE_DEBUG§f§l]§r World: §e'§a" + world.getName()
-		// + "§e'§r Sent §e'§a" + sent + "§e'§r packets for chunk X: §e'§a" + x + "§e'§r
-		// Z: §e'§a" + z + "§e'§r."); //DEBUG
+		// player.sendMessage("§f§l[§e§lDE_DEBUG§f§l]§r World: §e'§a" + world.getName() + "§e'§r Sent §e'§a" + sent + "§e'§r packets for chunk X: §e'§a" + x + "§e'§r Z: §e'§a" + z + "§e'§r."); //DEBUG
 	}
+	
+	protected final class DelayedLangPacketsSender implements Runnable {
+
+		private final PacketEncoder packetencoder;
+		private final ChannelHandlerContext context;
+		private final ArmorstandOptions armorstandoptions;
+		private final ChannelPromise promise;
+		private final Player player;
+		private final String worldname;
+		private final ObjectContainer<String> sc;
+		private final long chunkpos;
+
+		protected DelayedLangPacketsSender(PacketEncoder packetencoder, ChannelHandlerContext context, ArmorstandOptions armorstandoptions, ChannelPromise promise, Player player, String worldname, ObjectContainer<String> sc, long chunkpos) {
+			this.packetencoder = packetencoder;
+			this.context = context;
+			this.armorstandoptions = armorstandoptions;
+			this.promise = promise;
+			this.player = player;
+			this.worldname = worldname;
+			this.sc = sc;
+			this.chunkpos = chunkpos;
+		}
+		
+		@Override
+		public void run() {
+			String worldname, langkey;
+			if(!player.isOnline() || (worldname = player.getWorld().getName()) == null || !worldname.equals(this.worldname) || (langkey = sc.value) == null) {
+				return;
+			}
+			String worldwithlang = worldname.concat("\0").concat(langkey);
+			Packet[] langarmorstandpackets = this.armorstandoptions.getPackets(worldwithlang, chunkpos);
+			if(langarmorstandpackets != null) {
+				for (Packet packet : langarmorstandpackets) {
+					try {
+						packetencoder.write(context, packet, promise);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+				
+			}
+		}
+		
+	}
+	
 
 	protected final class DelayedPacketSender implements Runnable {
 

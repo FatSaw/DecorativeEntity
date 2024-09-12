@@ -83,7 +83,7 @@ public final class FallingBlockOptions extends Options {
 						fallingblockspawns.add(fallingblockspawnpacket);
 						fallingblockspawns.add(fallingblockmetadatapacket);
 					}
-					packetoptions.put(entry.getKey(), fallingblockspawns.toArray(new Packet[value.size()]));
+					packetoptions.put(entry.getKey(), fallingblockspawns.toArray(new Packet[fallingblockspawns.size()]));
 				}
 				packets.put(worldname, packetoptions);
 			}

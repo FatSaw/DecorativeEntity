@@ -83,7 +83,7 @@ public final class EndCrystalOptions extends Options {
 						crystalspawns.add(endcrystalspawnpacket);
 						crystalspawns.add(endcrystalmetadatapacket);
 					}
-					packetoptions.put(entry.getKey(), crystalspawns.toArray(new Packet[value.size()]));
+					packetoptions.put(entry.getKey(), crystalspawns.toArray(new Packet[crystalspawns.size()]));
 				}
 				packets.put(worldname, packetoptions);
 			}

@@ -87,7 +87,7 @@ public final class HumanOptions extends Options {
 					}
 					humanspawns.add(playerinfoadd);
 					humanspawns.add(playerinforemove);
-					packetoptions.put(entry.getKey(), humanspawns.toArray(new Packet[value.size()]));
+					packetoptions.put(entry.getKey(), humanspawns.toArray(new Packet[humanspawns.size()]));
 				}
 
 				packets.put(worldname, packetoptions);
